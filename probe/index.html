@@ -1,0 +1,20 @@
+<html>
+  <head>
+    <!-- build:js(tmp/result) /assets/vendor.min.js -->
+    <script src="/vendor/loader.js/loader.js"></script>
+    <script src="/vendor/rsvp/rsvp.amd.js"></script>
+    <script src="/lib/reqwest.js"></script>
+    <!-- endbuild -->
+
+    <!-- build:js(tmp/result) /assets/probe.min.js -->
+    <script src="/assets/probe.js"></script>
+    <!-- endbuild -->
+  </head>
+  <body>
+    <!-- @if tests=false -->
+    <script>
+      require(['nutprobe/probe']);
+    </script>
+    <!-- @endif -->
+  </body>
+</html>

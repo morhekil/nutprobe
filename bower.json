@@ -1,0 +1,9 @@
+{
+  "name": "nutprobe",
+  "dependencies": {
+    "loader.js": "git://github.com/stefanpenner/loader.js#master",
+    "cookies-js": "~0.4.0",
+    "rsvp": "~3.0.8"
+  },
+  "devDependencies": {}
+}
