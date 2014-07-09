@@ -160,6 +160,7 @@ module.exports = function(grunt) {
                      // 'svgmin',
                      'copy:dist', // Copies files not covered by concat and imagemin
 
+                     'copy:probe',
                      'rev', // Appends 8 char hash value to filenames
                      'usemin', // Replaces file references
                      'htmlmin:dist' // Removes comments and whitespace

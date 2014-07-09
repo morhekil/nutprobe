@@ -46,7 +46,7 @@ module.exports = {
       src: ['**'],
       dest: 'tmp/result/'
     }, {
-      src: ['vendor/**/*.js', 'vendor/**/*.css'],
+      src: ['lib/**/*.js', 'vendor/**/*.js', 'vendor/**/*.css'],
       dest: 'tmp/result/'
     }, {
       src: ['config/environment.js', 'config/environments/production.js'],
@@ -69,10 +69,19 @@ module.exports = {
         '!**/*.{css,js}', // Already handled by concat
         '!**/*.{png,gif,jpg,jpeg}', // Already handled by imagemin
         '!tests/**/*', // No tests, please
-        '!**/*.map' // No source maps
+        '!**/*.map', // No source maps
       ],
       filter: 'isFile',
       dest: 'dist/'
+    }]
+  },
+
+  probe: {
+    files: [{
+      expand: false,
+      src: 'dist/assets/probe.min.js',
+      filter: 'isFile',
+      dest: 'dist/assets/probe.static.js'
     }]
   },
 };
