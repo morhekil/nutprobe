@@ -1,7 +1,7 @@
 var RSVP = require('rsvp');
 var j = require('140medley_j');
 
-export default function(targets, expected, fbUrl, reportSuccess) {
+export default function(targets, expected, fbUrl, reportSuccess, cooldown) {
   // Get IP of the current machine via HostIP API.
   // Returns memoized promise, that resolves with the IP address string
   var getIP = function() {
@@ -67,5 +67,10 @@ export default function(targets, expected, fbUrl, reportSuccess) {
   };
 
   // Initializes checks for all given targets
-  for (var i=0; i<targets.length; i++) { check(targets[i]); }
-};
+  if (!document.cookie.match('_nutprobed')) {
+    var cookie = '_nutprobed=1; path=/';
+    if (cooldown) { cookie += '; max-age='+3600*24*cooldown; }
+    document.cookie = cookie;
+    for (var i=0; i<targets.length; i++) { check(targets[i]); }
+  }
+}
