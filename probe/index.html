@@ -3,14 +3,25 @@
     <!-- build:js(tmp/result) /assets/probe.min.js -->
     <script src="/vendor/loader.js/loader.js"></script>
     <script src="/vendor/rsvp/rsvp.amd.js"></script>
-    <script src="/lib/reqwest.js"></script>
+    <script src="/lib/140medley_j.js"></script>
     <script src="/assets/probe.js"></script>
     <!-- endbuild -->
   </head>
   <body>
     <!-- @if tests=false -->
     <script>
-      require(['nutprobe/probe']);
+      var nutprobe = require('nutprobe/probe').default;
+      var targets = [
+        '//rspoker.com.dev/ping',
+        '//rspoker.ru.dev/ping',
+        '//rscasino.com.dev/ping',
+        '//rscasino.ru.dev/ping',
+        '//google.com/ping'
+      ];
+      nutprobe(targets,
+               'pong',
+               'https://nutprobe.firebaseio.com/reports',
+               false);
     </script>
     <!-- @endif -->
   </body>
