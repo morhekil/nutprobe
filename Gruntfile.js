@@ -38,10 +38,6 @@ module.exports = function(grunt) {
   // * for minimizing images in the dist task
   //   `npm install --save-dev grunt-contrib-imagemin`
   //
-  // * for using images based CSS sprites (http://youtu.be/xD8DW6IQ6r0)
-  //   `npm install --save-dev grunt-fancy-sprites`
-  //   `bower install --save fancy-sprites-scss`
-  //
   // * for automatically adding CSS vendor prefixes (autoprefixer)
   //   `npm install --save-dev grunt-autoprefixer`
   //
@@ -138,14 +134,12 @@ module.exports = function(grunt) {
 
   grunt.registerTask('build:dist', filterAvailable([
                      'createResultDirectory', // Create directoy beforehand, fixes race condition
-                     'fancySprites:create',
                      'concurrent:buildDist', // Executed in parallel, see config below
                      ]));
 
   grunt.registerTask('build:debug', filterAvailable([
                      'jshint:tooling',
                      'createResultDirectory', // Create directoy beforehand, fixes race condition
-                     'fancySprites:create',
                      'concurrent:buildDebug', // Executed in parallel, see config below
                      'notify:built_debug'
                      ]));

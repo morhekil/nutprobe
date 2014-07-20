@@ -24,7 +24,7 @@ module.exports = {
   },
   sprites: {
     files: [sprites],
-    tasks: filterAvailable(['lock', 'fancySprites:create', 'unlock', 'notify:built'])
+    tasks: filterAvailable(['lock', 'unlock', 'notify:built'])
   },
   styles: {
     files: [styles],

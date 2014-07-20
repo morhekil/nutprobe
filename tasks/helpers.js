@@ -13,7 +13,6 @@ var taskRequirements = {
   stylus: ['grunt-contrib-stylus'],
   imagemin: ['grunt-contrib-imagemin'],
   htmlmin: ['grunt-contrib-htmlmin'],
-  fancySprites: ['grunt-fancy-sprites'],
   autoprefixer: ['grunt-autoprefixer'],
   rev: ['grunt-rev'],
   'validate-imports': ['grunt-es6-import-validate'],
