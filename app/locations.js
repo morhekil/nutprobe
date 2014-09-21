@@ -19,7 +19,7 @@ function exportNode(node) {
   if (!cities[val.city]) {
     cities[val.city] = true;
     process.stdout.write([
-      val.city, val.location.latitude, val.location.longitude
+      val.city.replace(/ /g, '-'), val.location.latitude, val.location.longitude
     ].join(',') + "\n");
   }
 }
