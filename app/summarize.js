@@ -1,12 +1,10 @@
-var dotenv = require('dotenv');
-dotenv.load();
-
 var Q = require('q'),
     Firebase = require('firebase'),
     ipgeo = require('./ipgeo'),
-    fb = require('./firebatch'),
-    whois = require('whois-ux')
+    fb = require('./firebatch');
 
+// Transactionally writes a single success/failure atom into the statistical
+// data. Returns a promise that resolves with the data write is confirmed.
 function writeTick(keys, success) {
   var dfr = Q.defer();
 
@@ -22,6 +20,8 @@ function writeTick(keys, success) {
   return dfr.promise;
 }
 
+// Write full set of summarised statistics derive from the given report data
+// and the related geo location.
 function writeStat(report, geo) {
   var date = report.created_at.split('T')[0];
   var workers = [
@@ -37,6 +37,7 @@ function writeStat(report, geo) {
   return Q.all(workers);
 }
 
+// Clean up item in to the data, removing it from further processing
 function cleanupItem(rid) {
   return Q.Promise(function(resolve, reject) {
     var itemref = new Firebase(process.env.FBIO_REPORTS_URL + '/' + rid);
@@ -45,6 +46,7 @@ function cleanupItem(rid) {
   });
 }
 
+// Process a report item, given its id and the data reported
 function processItem(rid, report) {
   var dfr = Q.defer();
 
@@ -65,7 +67,6 @@ function processItem(rid, report) {
   return dfr.promise;
 }
 
-fb.authenticate()
-.then(function() { return fb.run(process.env.BATCH_SIZE*1, processItem); } )
-.then(function() { console.log("DONE"); process.exit(0); })
-.done();
+module.exports = {
+  item: processItem
+}
