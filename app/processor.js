@@ -1,82 +1,71 @@
-var Firebase = require('firebase');
-var FirebaseTokenGenerator = require("firebase-token-generator");
-var Q = require('q');
 var dotenv = require('dotenv');
 dotenv.load();
 
-var ipgeo = require('./ipgeo');
+var Q = require('q'),
+    Firebase = require('firebase'),
+    ipgeo = require('./ipgeo'),
+    fb = require('./firebatch'),
+    whois = require('whois-ux')
 
-var BATCH_SIZE = 4;
+function writeTick(keys, success) {
+  var dfr = Q.defer();
 
-function connectToReports() {
-  var tokenGenerator = new FirebaseTokenGenerator(process.env.FBIO_SECRET);
-  var token = tokenGenerator.createToken({ uid: "1" });
+  var key = keys.map(function(key) { return key.replace(/\W+/g, '-') }).join('/');
+  var ref = new Firebase(
+    [ process.env.FBIO_STATS_URL, key, success ? 'succ' : 'fail' ].join('/')
+  );
+  ref.transaction(
+    function(val) { return val*1 + 1; },
+    function(err) { err ? dfr.reject() : dfr.resolve() }
+  );
 
-  var reportsUrl = process.env.FBIO_REPORTS_URL;
-  console.log('Accessing Firebase reports at ', reportsUrl);
-  var reportsRef = new Firebase(reportsUrl);
+  return dfr.promise;
+}
 
-  var auth = Q.defer();
-  reportsRef.auth(token, function(error) {
-    if (error) { console.log("Auth failed", error); auth.reject(error); }
-    else { console.log("Auth success"); auth.resolve(reportsRef); }
+function writeStat(report, geo) {
+  var date = report.created_at.split('T')[0];
+  var workers = [
+    [date, report.target],
+    [date, report.target, geo.country.code],
+    [date, report.target, geo.country.code, 'ISP', geo.isp],
+    [date, report.target, geo.country.code, 'CITY', geo.city],
+    [date, report.target, geo.country.code, 'CITY', geo.city, geo.isp],
+  ].map(function(keys) {
+    return writeTick(keys, report.success);
   });
 
-  return auth.promise;
+  return Q.all(workers);
+}
+
+function cleanupItem(rid) {
+  return Q.Promise(function(resolve, reject) {
+    var itemref = new Firebase(process.env.FBIO_REPORTS_URL + '/' + rid);
+    itemref.remove();
+    resolve();
+  });
 }
 
 function processItem(rid, report) {
-  var res = Q.defer();
-  var date = report.created_at.split('T')[0];
-  whois.whois(report.ip, function(err, data) {
-    console.log(date, report.ip, data);
-    res.resolve();
-  });
-  return res.promise;
+  var dfr = Q.defer();
+
+  ipgeo.lookup(report.ip)
+  .then(function(geo) {
+          process.stdout.write('.');
+          return writeStat(report, geo);
+        },
+       function(geoerr) {
+         process.stderr.write("Geo ERR\t" + geoerr + "\t"+report.ip+"\n");
+         return true;
+       })
+  .then(function() { return cleanupItem(rid); })
+  .then(function() { dfr.resolve(); })
+  .fail(function(err) { dfr.reject(err); })
+  .done();
+
+  return dfr.promise;
 }
 
-function processBatch(data) {
-  var res = Q.defer();
-  var lastId;
-  var workers = [];
-
-  data.forEach(function(item) {
-    var rid = item.name();
-    var report = item.val();
-    // console.log(rid, report);
-    lastId = rid;
-    workers.push(processItem(rid, report));
-  });
-
-  Q.all(workers).then(function() { res.resolve(lastId); }).done();
-  return res.promise;
-}
-
-function processReports(reportsdb) {
-  var loadNextBatch = function(lastId) {
-    if (!lastId) { process.exit(0); }
-    processReports(reportsdb);
-  };
-  var processor = function(batch) { processBatch(batch).then(loadNextBatch).done(); }
-  reportsdb.limit(BATCH_SIZE).once('value', processor);
-}
-
-connectToReports()
-.then(function() { return ipgeo.lookup('203.55.215.252'); })
-.then(function() { process.exit(0); })
+fb.authenticate()
+.then(function() { return fb.run(process.env.BATCH_SIZE*1, processItem); } )
+.then(function() { console.log("DONE"); process.exit(0); })
 .done();
-// connectToReports().then(processReports);
-
-// for (;;) {
-//   var query = reports.limit(10);
-//   query.once('value', function(report) {
-//     var val = report.val();
-//     if (val === null) { process.exit(0); }
-
-//     console.log(val);
-//     var date = val.created_at.split('T')[0];
-//     whois.whois(val.ip, function(err, data) {
-//       console.log(date, val.ip, data.Country);
-//     });
-//   });
-// }
