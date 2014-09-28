@@ -20,8 +20,9 @@ function getSnapshot() {
 
 // Prints out given branch
 function printBranch(nodes) {
-  // console.log(nodes.length, tree.mindepth);
   if (nodes.length >= treecfg.mindepth) {
+    // node is at the required depth - this is the data we're interested in,
+    // print the branch
     console.log(nodes.join(','));
   }
 }
@@ -44,11 +45,14 @@ function exportTree(root, tree, parents) {
   if (!parents) { parents = []; }
 
   if (!tree || typeof(tree) != 'object') {
-    // reached a leaf
+    // reached a leaf - print the whole branch
     printBranch(parents.concat([root, tree]));
     return;
   }
+  // Calculate failure rate, of either succ or fail counter is present at
+  // this node
   if (tree.succ || tree.fail) { calcRate(tree); }
+  // Reset parents history at the given tree depth
   if (parents.length == treecfg.targets_at) { root = treecfg.targets[root] || root; }
 
   Object.keys(tree).map(function(node) {
@@ -60,12 +64,12 @@ function exportTree(root, tree, parents) {
 // Export received snapshot as csv data
 function exportData(snap) {
   var data = snap.val();
-  var treex = function(key) { return exportTree(key, data[key]); }
   console.log(treecfg.labels.join(','));
 
+  var treex = function(key) { return exportTree(key, data[key]); }
   return Q.Promise(function(resolve) {
-    var csv = Object.keys(data).map(treex).join("\n");
-    resolve(csv);
+    Object.keys(data).map(treex);
+    resolve(true);
   });
 }
 

@@ -51,7 +51,8 @@ export default function(targets, expected, fbUrl, reportSuccess, cooldown) {
     });
   };
 
-  // Entry point for a target check. Fires off a request to
+  // Entry point for a target check. Fires off a request to the given target,
+  // and logs the result
   var check = function(target) {
     try {
       j.request('GET', target).then(

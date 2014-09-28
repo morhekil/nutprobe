@@ -67,14 +67,15 @@ function writeCache(ip, geodata, dfr) {
 
 // Extract a userful subset of data from the data hash received from Maxmind
 function maxmindSubset(data) {
+  var country = data.country || data.registered_country;
   return {
-    country: { code: data.country.iso_code, name: data.country.names.en },
-    location: data.location,
+    country: { code: country.iso_code, name: country.names.en },
+    location: data.location || 'NA',
     city: (data.city || {names: { en: 'NA' }})['names']['en'],
-    continent: data.continent.names.en,
+    continent: (data.continent || { names: { en: 'NA' }}).names.en,
     domain: data.traits.domain || "",
     isp: data.traits.isp,
-    isp_org: data.traits.autonomous_system_organization
+    isp_org: data.traits.autonomous_system_organization || ""
   };
 }
 
@@ -98,8 +99,8 @@ function queryMaxmind(lookup) {
 }
 
 // Main API - perform a lookup of the given IP address.
-// It checks Firebase cache first, and if the IP information is not there -
-// queries Maxmind, and writes the value into the Firebase cache
+// It checks local and Firebase caches first, and if the IP information is not
+// there - queries Maxmind, and writes the value into the Firebase cache
 ipgeo.lookup = function(ip) {
   return Q.Promise(function(resolve, reject) {
     readCache(ip)

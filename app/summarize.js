@@ -61,8 +61,7 @@ function processItem(rid, report) {
        })
   .then(function() { return cleanupItem(rid); })
   .then(function() { dfr.resolve(); })
-  .fail(function(err) { dfr.reject(err); })
-  .done();
+  .fail(function(err) { dfr.reject(err); });
 
   return dfr.promise;
 }
