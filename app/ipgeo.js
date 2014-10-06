@@ -74,7 +74,7 @@ function maxmindSubset(data) {
     city: (data.city || {names: { en: 'NA' }})['names']['en'],
     continent: (data.continent || { names: { en: 'NA' }}).names.en,
     domain: data.traits.domain || "",
-    isp: data.traits.isp,
+    isp: data.traits.isp || "",
     isp_org: data.traits.autonomous_system_organization || ""
   };
 }
